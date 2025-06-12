@@ -23,6 +23,11 @@ from ai_scientist.perform_review import (
 )
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
 
+
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
+
 NUM_REFLECTIONS = 3
 
 
