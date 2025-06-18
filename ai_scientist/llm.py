@@ -63,21 +63,23 @@ AVAILABLE_LLMS = [
 
 
 # Get N responses from a single message, used for ensembling.
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
+@backoff.on_exception(
+    backoff.expo, (openai.RateLimitError, openai.APITimeoutError)
+)
 def get_batch_responses_from_llm(
-        msg,
-        client,
-        model,
-        system_message,
-        print_debug=False,
-        msg_history=None,
-        temperature=0.75,
-        n_responses=1,
+    msg,
+    client,
+    model,
+    system_message,
+    print_debug=False,
+    msg_history=None,
+    temperature=0.75,
+    n_responses=1,
 ):
     if msg_history is None:
         msg_history = []
 
-    if 'gpt' in model:
+    if "gpt" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
             model=model,
@@ -93,7 +95,8 @@ def get_batch_responses_from_llm(
         )
         content = [r.message.content for r in response.choices]
         new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+            new_msg_history + [{"role": "assistant", "content": c}]
+            for c in content
         ]
     elif model == "llama-3-1-405b-instruct":
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
@@ -110,7 +113,8 @@ def get_batch_responses_from_llm(
         )
         content = [r.message.content for r in response.choices]
         new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+            new_msg_history + [{"role": "assistant", "content": c}]
+            for c in content
         ]
     else:
         content, new_msg_history = [], []
@@ -131,7 +135,7 @@ def get_batch_responses_from_llm(
         print()
         print("*" * 20 + " LLM START " + "*" * 20)
         for j, msg in enumerate(new_msg_history[0]):
-            print(f'{j}, {msg["role"]}: {msg["content"]}')
+            print(f"{j}, {msg['role']}: {msg['content']}")
         print(content)
         print("*" * 21 + " LLM END " + "*" * 21)
         print()
@@ -139,15 +143,17 @@ def get_batch_responses_from_llm(
     return content, new_msg_history
 
 
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
+@backoff.on_exception(
+    backoff.expo, (openai.RateLimitError, openai.APITimeoutError)
+)
 def get_response_from_llm(
-        msg,
-        client,
-        model,
-        system_message,
-        print_debug=False,
-        msg_history=None,
-        temperature=0.75,
+    msg,
+    client,
+    model,
+    system_message,
+    print_debug=False,
+    msg_history=None,
+    temperature=0.75,
 ):
     if msg_history is None:
         msg_history = []
@@ -183,7 +189,7 @@ def get_response_from_llm(
                 ],
             }
         ]
-    elif 'gpt' in model:
+    elif "gpt" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
             model=model,
@@ -198,7 +204,9 @@ def get_response_from_llm(
             seed=0,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
     elif "o1" in model or "o3" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -213,8 +221,13 @@ def get_response_from_llm(
             seed=0,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-    elif model in ["meta-llama/llama-3.1-405b-instruct", "llama-3-1-405b-instruct"]:
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
+    elif model in [
+        "meta-llama/llama-3.1-405b-instruct",
+        "llama-3-1-405b-instruct",
+    ]:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
             model="meta-llama/llama-3.1-405b-instruct",
@@ -228,7 +241,9 @@ def get_response_from_llm(
             stop=None,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
     elif model in ["deepseek-chat", "deepseek-coder"]:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -243,7 +258,9 @@ def get_response_from_llm(
             stop=None,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
     elif model in ["deepseek-reasoner"]:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -256,7 +273,9 @@ def get_response_from_llm(
             stop=None,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
     elif "gemini" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -270,7 +289,9 @@ def get_response_from_llm(
             n=1,
         )
         content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+        new_msg_history = new_msg_history + [
+            {"role": "assistant", "content": content}
+        ]
     else:
         raise ValueError(f"Model {model} not supported.")
 
@@ -278,7 +299,7 @@ def get_response_from_llm(
         print()
         print("*" * 20 + " LLM START " + "*" * 20)
         for j, msg in enumerate(new_msg_history):
-            print(f'{j}, {msg["role"]}: {msg["content"]}')
+            print(f"{j}, {msg['role']}: {msg['content']}")
         print(content)
         print("*" * 21 + " LLM END " + "*" * 21)
         print()
@@ -326,26 +347,26 @@ def create_client(model):
         client_model = model.split("/")[-1]
         print(f"Using Vertex AI with model {client_model}.")
         return anthropic.AnthropicVertex(), client_model
-    elif 'gpt' in model or "o1" in model or "o3" in model:
+    elif "gpt" in model or "o1" in model or "o3" in model:
         print(f"Using OpenAI API with model {model}.")
         return openai.OpenAI(), model
     elif model in ["deepseek-chat", "deepseek-reasoner", "deepseek-coder"]:
         print(f"Using OpenAI API with {model}.")
         return openai.OpenAI(
             api_key=os.environ["DEEPSEEK_API_KEY"],
-            base_url="https://api.deepseek.com"
+            base_url="https://api.deepseek.com",
         ), model
     elif model == "llama3.1-405b":
         print(f"Using OpenAI API with {model}.")
         return openai.OpenAI(
             api_key=os.environ["OPENROUTER_API_KEY"],
-            base_url="https://openrouter.ai/api/v1"
+            base_url="https://openrouter.ai/api/v1",
         ), "meta-llama/llama-3.1-405b-instruct"
     elif "gemini" in model:
         print(f"Using OpenAI API with {model}.")
         return openai.OpenAI(
             api_key=os.environ["GEMINI_API_KEY"],
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
         ), model
     else:
         raise ValueError(f"Model {model} not supported.")
